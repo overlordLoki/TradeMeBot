@@ -15,7 +15,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-
 import io.github.bonigarcia.wdm.WebDriverManager;
 import net.dv8tion.jda.api.events.message.guild.*;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -34,6 +33,10 @@ public class Commands extends ListenerAdapter {
 	private static boolean shouldRun = true;
 	private static List<Long> queryTimes = new ArrayList<Long>();
 	
+	/*
+	 * This method is called when a message is sent in a channel.
+	 * It checks if the message starts with the PREF and if it does, it calls the appropriate method.
+	 */
 	@Override
 	public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
 		String[] args = event.getMessage().getContentRaw().split(" ");
@@ -131,6 +134,9 @@ public class Commands extends ListenerAdapter {
 		}
 	}
     
+	/*
+	 *  This method is called when the bot is ready.
+	 */
     private List<WebElement> scrape(WebDriver driver) {
     	long start = System.currentTimeMillis();
     	driver.get(trademeURL);
@@ -142,38 +148,50 @@ public class Commands extends ListenerAdapter {
     	return driver.findElements(By.className("tm-motors-search-card__link"));
     }
     
+	/*
+	 * This will build a car object from a web element from the scraping of the page
+	 * 
+	 */
 	public Car buildCar(WebElement w) {
+		// Get the link to the car
 		String link = w.getAttribute("href");
+		// Get the ID of the car
 		long id = Long.parseLong(w.getAttribute("href").split("/")[9].substring(0,10));
+		// Get the title of the car
 		String title = w.findElement(By.className("tm-motors-search-card__title"))
 				.getAttribute("aria-label");
-		String MakeAndmodle = title.substring(5,title.length()-1);
+		// Get the make and model of the car
+		String Make_Model = title.substring(5,title.length()-1);
+		// Get the year of the car
 		int year = Integer.parseInt(title.substring(0, 4));
-		String make = MakeAndmodle.split(" ")[0];
-		String arr[] = MakeAndmodle.split(" ",2);
-		String modle;
+		// spilt the make and model into separate strings
+		String make = Make_Model.split(" ")[0];
+		String arr[] = Make_Model.split(" ",2);
+		String model;
 		if(arr.length<2) {
-			modle = arr[0];
+			model = arr[0];
 		}else {
-			modle = arr[1];
+			model = arr[1];
 		}
-		long on = 0;
+		// get the odometer of the car
+		long odometer = 0;
 		try {
 			String o = w.findElement(By.className("tm-motors-search-card__body-odometer"))
 					.getAttribute("aria-label");
-			on = Integer.parseInt(o.substring(0,o.length()-1));
+			odometer = Integer.parseInt(o.substring(0,o.length()-1));
 		} catch (Exception e) {}
-		
+		// get the price of the car
 		String p = w.findElement(By.className("tm-motors-search-card__price")).getText();
 		Number number = null;
 		try {
 			number = NumberFormat.getCurrencyInstance(Locale.US)
 			        .parse(p);
 		} catch (ParseException e) {e.printStackTrace();}
+		// get the engine size of the car
 		String engineDetails = w.findElement(By.className("tm-motors-search-card__engine-details"))
 				.getAttribute("aria-label");
-		//"tm-motors-search-card__body-modelDetail ng-star-inserted"
-		Car car = new Car(id,year,make, modle, on, number.intValue(),title,engineDetails);
+		// build the car object and return it
+		Car car = new Car(id,year,make, model, odometer, number.intValue(),title,engineDetails);
 		car.setLink(link);
 		return car;
 	}
