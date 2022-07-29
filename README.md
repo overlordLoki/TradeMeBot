@@ -1,2 +1,2 @@
 # TradeMeBot
- gets latest listing from trademe and posts in discord
+ gets latest listing from TradeMe and posts in discord
