@@ -5,9 +5,9 @@ import net.dv8tion.jda.api.OnlineStatus;
 
 public class DiscordBot {
 	public DiscordBot() {}
+	private final String token = discordToken.getToken();
 	public void run() throws LoginException {
-		JDABuilder jda = JDABuilder.createDefault(
-				"OTE5ODEzMDAxNjM5NTI2NDMw.YbbQnA.5Xi7iXBZwt8eclGFeIpSTLKY5QY");
+		JDABuilder jda = JDABuilder.createDefault(token);
 		jda.setStatus(OnlineStatus.ONLINE);
 		jda.addEventListeners(new Commands());
 		jda.build();
